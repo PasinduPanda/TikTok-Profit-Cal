@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Profit & Price Calculator</h1>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="tiktok-us">Tiktok US (Price)</button>
+                <button class="tab-btn" data-tab="tiktok-us-profit">Tiktok US (Profit)</button>
+                <button class="tab-btn" data-tab="tiktok-uk">Tiktok UK (Price)</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Tiktok US Calculator -->
+            <section id="tiktok-us" class="calculator-section active">
+                <div class="calc-grid">
+                    <div class="input-card">
+                        <h2>Product Details</h2>
+                        <div class="form-group">
+                            <label>Product Cost (RMB)</label>
+                            <input type="number" id="us-product-cost" value="70" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Exchange Rate (RMB to USD)</label>
+                            <input type="number" id="us-exchange-rate" value="7.0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Marketing</h2>
+                        <div class="form-group">
+                            <label>Ads Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="us-ads-cost" value="5.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Affiliation Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="us-aff-cost" value="13.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Operational & Fixed</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Flight ($)</label>
+                                <input type="number" id="us-first-flight" value="1.50" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Flight ($)</label>
+                                <input type="number" id="us-last-flight" value="9.50" step="0.01">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tiktok Fee (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="us-tiktok-fee" value="8.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Refund (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="us-refund-rate" value="10.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="form-group highlight-input">
+                            <label>Desired Profit Margin (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="us-profit-margin" value="25.00" step="1">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>Calculated Results</h3>
+                        <div class="result-row">
+                            <span>Product + Shipping</span>
+                            <span id="us-result-shipping" class="value">$21.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>Total Cost %</span>
+                            <span id="us-result-cost-percent" class="value">61.00%</span>
+                        </div>
+                        <div class="result-divider"></div>
+                        <div class="result-main">
+                            <span>Total Selling Price</span>
+                            <span id="us-result-price" class="main-value">$53.85</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Tiktok US Profit Calculator -->
+             <section id="tiktok-us-profit" class="calculator-section">
+                <div class="calc-grid">
+                    <div class="input-card">
+                        <h2>Product & Price</h2>
+                        <div class="form-group">
+                            <label>Product Cost (RMB)</label>
+                            <input type="number" id="us-p-product-cost" value="69" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Target Selling Price ($)</label>
+                            <input type="number" id="us-p-selling-price" value="49.99" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Exchange Rate (RMB to USD)</label>
+                            <input type="number" id="us-p-exchange-rate" value="7.0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Marketing</h2>
+                        <div class="form-group">
+                            <label>Ads Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="us-p-ads-cost" value="5.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Affiliation Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="us-p-aff-cost" value="13.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Operational & Fixed</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Flight ($)</label>
+                                <input type="number" id="us-p-first-flight" value="1.50" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Flight ($)</label>
+                                <input type="number" id="us-p-last-flight" value="9.50" step="0.01">
+                            </div>
+                        </div>
+                         <div class="form-row">
+                            <div class="form-group">
+                                <label>Tiktok Fee (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="us-p-tiktok-fee" value="8.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Refund (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="us-p-refund-rate" value="10.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>Calculated Results</h3>
+                         <div class="result-row">
+                            <span>Product + Shipping</span>
+                            <span id="us-p-result-shipping" class="value">$20.86</span>
+                        </div>
+                        <div class="result-row">
+                            <span>Product + Shipping Cost %</span>
+                            <span id="us-p-result-shipping-percent" class="value">41.72%</span>
+                        </div>
+                        <div class="result-divider"></div>
+                        <div class="result-main">
+                            <span>Profit Margin</span>
+                            <span id="us-p-result-margin" class="main-value">22.28%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Tiktok UK Calculator -->
+             <section id="tiktok-uk" class="calculator-section">
+                <div class="calc-grid">
+                     <div class="input-card">
+                        <h2>Product Details</h2>
+                        <div class="form-group">
+                            <label>Product Cost (RMB)</label>
+                            <input type="number" id="uk-product-cost" value="70" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Exchange Rate (RMB to GBP)</label>
+                            <input type="number" id="uk-exchange-rate" value="9.0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Marketing</h2>
+                        <div class="form-group">
+                            <label>Ads Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="uk-ads-cost" value="0.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Affiliation Cost (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="uk-aff-cost" value="0.00" step="0.01">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <h2>Operational & Fixed</h2>
+                         <div class="form-group">
+                            <label>Direct Shipping Cost (£)</label>
+                             <input type="number" id="uk-shipping-cost" value="10.00" step="0.01">
+                        </div>
+                         <div class="form-row">
+                            <div class="form-group">
+                                <label>Tiktok Fee (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="uk-tiktok-fee" value="8.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Refund (%)</label>
+                                <div class="input-with-suffix">
+                                    <input type="number" id="uk-refund-rate" value="10.00" step="0.01">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="form-group highlight-input">
+                            <label>Desired Profit Margin (%)</label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="uk-profit-margin" value="40.00" step="1">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>Calculated Results</h3>
+                         <div class="result-row">
+                            <span>Product + Shipping (GBP)</span>
+                            <span id="uk-result-shipping" class="value">£17.78</span>
+                        </div>
+                         <div class="result-row">
+                            <span>Total Cost %</span>
+                            <span id="uk-result-cost-percent" class="value">58.00%</span>
+                        </div>
+                        <div class="result-divider"></div>
+                        <div class="result-main">
+                            <span>Selling Price (GBP)</span>
+                            <span id="uk-result-price" class="main-value">£42.33</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
