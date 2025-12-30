@@ -238,6 +238,9 @@ class Calculator {
                 <td class="res-shipping result-cell">-</td>
                 <td class="res-main result-cell">-</td>
             `;
+        } else {
+            console.error('Unknown settings prefix:', this.settingsPrefix);
+            return; // Exit if no valid prefix
         }
 
         html += `
@@ -262,7 +265,11 @@ class Calculator {
         });
 
         // Run initial calc
-        this.calculateRow(tr);
+        try {
+            this.calculateRow(tr);
+        } catch (err) {
+            console.error('Error calculating row on init:', err);
+        }
     }
 
     // --- NEW: Paste Handler implementation ---
