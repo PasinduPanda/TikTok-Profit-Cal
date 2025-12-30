@@ -177,8 +177,11 @@ class Calculator {
         this.tableBody.appendChild(tr);
 
         // Bind events
-        tr.querySelectorAll('input').forEach(input => {
+        const inputs = tr.querySelectorAll('input');
+        inputs.forEach((input, index) => {
             input.addEventListener('input', () => this.calculateRow(tr));
+            // Add Paste Listener to EVERY input
+            input.addEventListener('paste', (e) => this.handlePaste(e, tr, index));
         });
 
         tr.querySelector('.delete-row').addEventListener('click', () => {
@@ -187,6 +190,53 @@ class Calculator {
 
         // Run initial calc
         this.calculateRow(tr);
+    }
+
+    // --- NEW: Paste Handler implementation ---
+    handlePaste(e, startRow, startColIndex) {
+        e.preventDefault();
+        const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
+
+        // Parse rows (newline)
+        const rows = clipboardData.split(/\r\n|\n|\r/).filter(row => row.trim() !== '');
+
+        let currentRow = startRow;
+
+        rows.forEach((rowData, rowIndex) => {
+            // Parse columns (tab)
+            const cells = rowData.split('\t');
+
+            // If we run out of rows, create new ones
+            if (!currentRow) {
+                this.addRow();
+                // Getting the last added row
+                currentRow = this.tableBody.lastElementChild;
+            }
+
+            // Get all inputs in this row
+            const rowInputs = currentRow.querySelectorAll('input');
+
+            cells.forEach((cellData, cellIndex) => {
+                // Determine target input index 
+                // We add startColIndex to handle pasting starting from middle columns
+                const targetInputIndex = startColIndex + cellIndex;
+
+                if (targetInputIndex < rowInputs.length) {
+                    // Clean data (remove currency symbols, %, etc just in case)
+                    let cleanValue = cellData.replace(/[$,£%]/g, '').trim();
+                    // Basic number check
+                    if (!isNaN(parseFloat(cleanValue))) {
+                        rowInputs[targetInputIndex].value = cleanValue;
+                    }
+                }
+            });
+
+            // Recalculate this row
+            this.calculateRow(currentRow);
+
+            // Move to next row
+            currentRow = currentRow.nextElementSibling;
+        });
     }
 
     calculateRow(row) {
