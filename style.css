@@ -7,10 +7,10 @@
     --text-secondary: #6b7280;
     --border-color: #e5e7eb;
     --success-color: #10b981;
-    --highlight-bg: #f3f4f6;
+    --danger-color: #ef4444;
+    --surface-hover: #f9fafb;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -24,15 +24,14 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
     padding: 2rem;
 }
 
 .app-container {
     width: 100%;
-    max-width: 1200px;
-    background: transparent;
+    max-width: 1400px;
+    /* Wider for tables */
+    margin: 0 auto;
 }
 
 header {
@@ -45,7 +44,6 @@ header h1 {
     font-weight: 700;
     margin-bottom: 1.5rem;
     color: var(--primary-color);
-    letter-spacing: -0.025em;
 }
 
 .tabs {
@@ -54,6 +52,9 @@ header h1 {
     padding: 0.5rem;
     border-radius: 9999px;
     box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .tab-btn {
@@ -78,6 +79,7 @@ header h1 {
     box-shadow: var(--shadow-sm);
 }
 
+/* Sections */
 .calculator-section {
     display: none;
     animation: fadeIn 0.3s ease-out;
@@ -88,54 +90,62 @@ header h1 {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 
-.calc-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    align-items: start;
-}
-
-/* Make logic: First two inputs cols, result takes full height or floats */
-@media (min-width: 1024px) {
-    .calc-grid {
-        grid-template-columns: 1fr 1fr 1.2fr;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-.input-card {
+/* Settings Panel */
+.settings-panel {
     background: var(--card-bg);
-    padding: 1.5rem;
     border-radius: 1rem;
+    margin-bottom: 1.5rem;
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
     border: 1px solid var(--border-color);
 }
 
-.input-card h2 {
-    font-size: 1.1rem;
+.settings-toggle {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 1.25rem;
     color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.settings-content {
+    display: none;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--surface-hover);
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-label {
+.settings-content.open {
     display: block;
-    font-size: 0.875rem;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
@@ -143,137 +153,148 @@ label {
 
 input {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.8rem;
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.2s;
-    background: var(--highlight-bg);
 }
 
 input:focus {
     outline: none;
     border-color: var(--accent-color);
-    background: white;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.input-with-suffix {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-with-suffix input {
-    padding-right: 2.5rem;
-}
-
-.input-with-suffix span {
-    position: absolute;
-    right: 1rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    pointer-events: none;
-}
-
-.highlight-input {
-    background: #eff6ff;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    margin-top: 1rem;
-    border: 1px solid #dbeafe;
-}
-
-.highlight-input input {
-    background: white;
-    border-color: #bfdbfe;
-}
-
-/* Result Card */
-.result-card {
-    background: var(--primary-color);
-    color: white;
-    padding: 2rem;
+/* Table Styles */
+.table-container {
+    background: var(--card-bg);
     border-radius: 1rem;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100%;
+    box-shadow: var(--shadow-md);
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
 }
 
-.result-card h3 {
-    font-size: 1rem;
+.calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    /* Force scroll on small screens */
+}
+
+.calc-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background: var(--surface-hover);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    opacity: 0.8;
-    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
-.result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+.calc-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
 }
 
-.result-row span:first-child {
-    opacity: 0.9;
-    font-weight: 300;
+.calc-table tr:last-child td {
+    border-bottom: none;
 }
 
-.result-row .value {
+.calc-table input {
+    width: 100px;
+}
+
+.result-cell {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    color: var(--text-primary);
 }
 
-.result-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 1.5rem 0;
+.profit-positive {
+    color: var(--success-color);
 }
 
-.result-main {
+.profit-negative {
+    color: var(--danger-color);
+}
+
+/* Buttons */
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    font-size: 1.25rem;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: #fee2e2;
+    color: var(--danger-color);
+}
+
+.add-btn {
+    display: inline-flex;
+    align-items: center;
     gap: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: var(--shadow-sm);
 }
 
-.result-main span:first-child {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    text-transform: uppercase;
+.add-btn:hover {
+    background: #333;
 }
 
-.result-main .main-value {
-    font-size: 3.5rem;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    background: -webkit-linear-gradient(45deg, #ffffff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Mobile Adjustments */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-    body { padding: 1rem; }
-    
-    header h1 { font-size: 1.75rem; }
-    
-    .tabs { 
-        width: 100%; 
-        justify-content: space-between;
-        padding: 0.25rem;
-    }
-    
-    .tab-btn {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.85rem;
-        flex: 1;
+    body {
+        padding: 1rem;
     }
 
-    .result-main .main-value {
-        font-size: 2.5rem;
+    .tabs {
+        width: 100%;
+    }
+
+    .tab-btn {
+        flex: 1 1 auto;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Force table to scroll horizontally on mobile */
+    .table-container {
+        margin: 0 -1rem;
+        width: calc(100% + 2rem);
+        border-radius: 0;
+        border-right: none;
+        border-left: none;
+    }
+
+    .calc-table th:first-child,
+    .calc-table td:first-child {
+        padding-left: 1.5rem;
     }
 }

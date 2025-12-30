@@ -1,51 +1,62 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Tabs Logic ---
-    const tabs = document.querySelectorAll('.tab-btn');
-    const sections = document.querySelectorAll('.calculator-section');
+class CalculatorApp {
+    constructor() {
+        this.initTabs();
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Remove active class from all
-            tabs.forEach(t => t.classList.remove('active'));
-            sections.forEach(s => s.classList.remove('active'));
+        // Initialize Calculators
+        this.usPrice = new Calculator('tiktok-us', 'us', this.calcUSPrice.bind(this));
+        this.usProfit = new Calculator('tiktok-us-profit', 'us-p', this.calcUSProfit.bind(this));
+        this.ukPrice = new Calculator('tiktok-uk', 'uk', this.calcUKPrice.bind(this));
 
-            // Add to current
-            tab.classList.add('active');
-            const targetId = tab.dataset.tab;
-            document.getElementById(targetId).classList.add('active');
+        // Initial Rows
+        this.usPrice.addRow();
+        this.usProfit.addRow();
+        this.ukPrice.addRow();
+
+        // Add one more example row for them
+        this.usPrice.addRow();
+    }
+
+    initTabs() {
+        const tabs = document.querySelectorAll('.tab-btn');
+        const sections = document.querySelectorAll('.calculator-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
         });
-    });
 
-    // --- Calculation Logic ---
+        // Global Settings Listener
+        document.querySelectorAll('.settings-panel input').forEach(input => {
+            input.addEventListener('input', () => {
+                this.usPrice.recalculateAll();
+                this.usProfit.recalculateAll();
+                this.ukPrice.recalculateAll();
+            });
+        });
+    }
 
-    // 1. Tiktok US Price
-    const calcTiktokUS = () => {
+    // --- Calculation Logic Handlers ---
+
+    calcUSPrice(row, settings) {
         // Inputs
-        const rmbCost = parseFloat(document.getElementById('us-product-cost').value) || 0;
-        const exchangeRate = parseFloat(document.getElementById('us-exchange-rate').value) || 7.0;
-        const adsCostPercent = (parseFloat(document.getElementById('us-ads-cost').value) || 0) / 100;
-        const affCostPercent = (parseFloat(document.getElementById('us-aff-cost').value) || 0) / 100;
-        const firstFlight = parseFloat(document.getElementById('us-first-flight').value) || 0;
-        const lastFlight = parseFloat(document.getElementById('us-last-flight').value) || 0;
-        const tiktokFeePercent = (parseFloat(document.getElementById('us-tiktok-fee').value) || 0) / 100;
-        const refundPercent = (parseFloat(document.getElementById('us-refund-rate').value) || 0) / 100;
-        const profitMargin = (parseFloat(document.getElementById('us-profit-margin').value) || 0) / 100;
+        const rmbCost = parseFloat(row.querySelector('.cost-input').value) || 0;
+        const adsCostPercent = (parseFloat(row.querySelector('.ads-input').value) || 0) / 100;
+        const affCostPercent = (parseFloat(row.querySelector('.aff-input').value) || 0) / 100;
+        const profitMargin = (parseFloat(row.querySelector('.margin-input').value) || 0) / 100;
 
-        // Calculations
-        // Product+Shipping USD = (Product Cost RMB / Exchange) + First Flight + Last Flight
+        // Global Inputs
+        const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
+        const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
+        const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
+
+        // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
-
-        // Total Cost % = Ads + Aff + Tiktok + Refund + Profit
-        // Note: In excel, Total % (K2) = F2+G2+H2+I2+J2
-        // Excel Formula for Selling Price (L2) = E2 / (1 - K2)
-        // Wait, check Excel formula again: L2 = E2 / (1 - K2)
-        // Where K2 is the SUM of percentages including Profit Margin.
-        // Let's verify K2 contents from previous thought:
-        // K2 = F2+G2+H2+I2+J2  (Ads + Aff + Service + Refund + Profit)
-        // If K2 = 61%, then Denominator = 1 - 0.61 = 0.39.
-        // Wait, if K2 is "Total %", then L2 = Cost / (1 - Total%). That implies Total% is NOT "Total Cost" in usual sense, 
-        // but the sum of all "margin-like" components taken from Selling Price.
-
         const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + refundPercent + profitMargin;
 
         let sellingPrice = 0;
@@ -53,100 +64,150 @@ document.addEventListener('DOMContentLoaded', () => {
             sellingPrice = productShippingUSD / (1 - sumPercentages);
         }
 
-        // Updates
-        document.getElementById('us-result-shipping').textContent = `$${productShippingUSD.toFixed(2)}`;
-        document.getElementById('us-result-cost-percent').textContent = `${(sumPercentages * 100).toFixed(2)}%`;
-        document.getElementById('us-result-price').textContent = `$${sellingPrice.toFixed(2)}`;
-    };
+        return {
+            shipping: `$${productShippingUSD.toFixed(2)}`,
+            mainResult: `$${sellingPrice.toFixed(2)}`
+        };
+    }
 
-    // 2. Tiktok US Profit
-    const calcTiktokUSProfit = () => {
+    calcUSProfit(row, settings) {
         // Inputs
-        const rmbCost = parseFloat(document.getElementById('us-p-product-cost').value) || 0;
-        const sellingPrice = parseFloat(document.getElementById('us-p-selling-price').value) || 0;
-        const exchangeRate = parseFloat(document.getElementById('us-p-exchange-rate').value) || 7.0;
-        const adsCostPercent = (parseFloat(document.getElementById('us-p-ads-cost').value) || 0) / 100;
-        const affCostPercent = (parseFloat(document.getElementById('us-p-aff-cost').value) || 0) / 100;
-        const firstFlight = parseFloat(document.getElementById('us-p-first-flight').value) || 0;
-        const lastFlight = parseFloat(document.getElementById('us-p-last-flight').value) || 0;
-        const tiktokFeePercent = (parseFloat(document.getElementById('us-p-tiktok-fee').value) || 0) / 100;
-        const refundPercent = (parseFloat(document.getElementById('us-p-refund-rate').value) || 0) / 100;
+        const rmbCost = parseFloat(row.querySelector('.cost-input').value) || 0;
+        const sellingPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+        const adsCostPercent = (parseFloat(row.querySelector('.ads-input').value) || 0) / 100;
+        const affCostPercent = (parseFloat(row.querySelector('.aff-input').value) || 0) / 100;
 
-        // Calculations
-        // Product+Shipping USD
+        // Global
+        const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
+        const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
+        const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
+
+        // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
-
-        // Product+Shipping Cost % (G2 in Excel) = P+S USD / Selling Price
-        let shippingCostPercent = 0;
-        if (sellingPrice > 0) {
-            shippingCostPercent = productShippingUSD / sellingPrice;
-        }
-
-        // Profit Margin (L2) = 1 - G2 - H2 - I2 - J2 - K2
-        // 1 - Cost% - Ads - Aff - Service - Refund
+        let shippingCostPercent = sellingPrice > 0 ? productShippingUSD / sellingPrice : 0;
         const profitMargin = 1 - shippingCostPercent - adsCostPercent - affCostPercent - tiktokFeePercent - refundPercent;
 
-        // Updates
-        document.getElementById('us-p-result-shipping').textContent = `$${productShippingUSD.toFixed(2)}`;
-        document.getElementById('us-p-result-shipping-percent').textContent = `${(shippingCostPercent * 100).toFixed(2)}%`;
-        document.getElementById('us-p-result-margin').textContent = `${(profitMargin * 100).toFixed(2)}%`;
+        return {
+            shipping: `$${productShippingUSD.toFixed(2)}`,
+            mainResult: `${(profitMargin * 100).toFixed(2)}%`,
+            isPercent: true,
+            val: profitMargin
+        };
+    }
 
-        // Add color for negative profit
-        const marginEl = document.getElementById('us-p-result-margin');
-        if (profitMargin < 0) {
-            marginEl.style.webkitTextFillColor = '#ef4444'; // Red
-            marginEl.style.background = 'none';
-            marginEl.style.color = '#ef4444';
-        } else {
-            marginEl.style.webkitTextFillColor = 'transparent'; // Reset to gradient
-            marginEl.style.background = '-webkit-linear-gradient(45deg, #ffffff, #e0e0e0)';
-            marginEl.style.webkitBackgroundClip = 'text';
-        }
-    };
-
-    // 3. Tiktok UK Price
-    const calcTiktokUK = () => {
+    calcUKPrice(row, settings) {
         // Inputs
-        const rmbCost = parseFloat(document.getElementById('uk-product-cost').value) || 0;
-        const exchangeRate = parseFloat(document.getElementById('uk-exchange-rate').value) || 9.0;
-        const adsCostPercent = (parseFloat(document.getElementById('uk-ads-cost').value) || 0) / 100;
-        const affCostPercent = (parseFloat(document.getElementById('uk-aff-cost').value) || 0) / 100;
-        const shippingCost = parseFloat(document.getElementById('uk-shipping-cost').value) || 0;
-        const tiktokFeePercent = (parseFloat(document.getElementById('uk-tiktok-fee').value) || 0) / 100;
-        const refundPercent = (parseFloat(document.getElementById('uk-refund-rate').value) || 0) / 100;
-        const profitMargin = (parseFloat(document.getElementById('uk-profit-margin').value) || 0) / 100;
+        const rmbCost = parseFloat(row.querySelector('.cost-input').value) || 0;
+        const adsCostPercent = (parseFloat(row.querySelector('.ads-input').value) || 0) / 100;
+        const affCostPercent = (parseFloat(row.querySelector('.aff-input').value) || 0) / 100;
+        const profitMargin = (parseFloat(row.querySelector('.margin-input').value) || 0) / 100;
 
-        // Calculations
-        // Product+Shipping GBP (D2) = (Product Cost / 9) + Shipping Cost
+        // Global
+        const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 9.0;
+        const shippingCost = parseFloat(document.getElementById(`${settings}-shipping-cost`).value) || 0;
+        const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
+
+        // Logic
         const productShippingGBP = (rmbCost / exchangeRate) + shippingCost;
-
-        // Total sum percentages (J2) = Ads + Aff + Service + Refund + Profit
         const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + refundPercent + profitMargin;
-
-        // Selling Price (K2) = D2 / (1 - J2)
         let sellingPrice = 0;
         if (sumPercentages < 1) {
             sellingPrice = productShippingGBP / (1 - sumPercentages);
         }
 
-        // Updates
-        document.getElementById('uk-result-shipping').textContent = `£${productShippingGBP.toFixed(2)}`;
-        document.getElementById('uk-result-cost-percent').textContent = `${(sumPercentages * 100).toFixed(2)}%`;
-        document.getElementById('uk-result-price').textContent = `£${sellingPrice.toFixed(2)}`;
+        return {
+            shipping: `£${productShippingGBP.toFixed(2)}`,
+            mainResult: `£${sellingPrice.toFixed(2)}`
+        };
+    }
+}
+
+class Calculator {
+    constructor(sectionId, settingsPrefix, calculationCallback) {
+        this.tableBody = document.querySelector(`#${sectionId} tbody`);
+        this.settingsPrefix = settingsPrefix;
+        this.calcFn = calculationCallback;
     }
 
-    // Attach Listeners
-    const inputsUS = document.querySelectorAll('#tiktok-us input');
-    inputsUS.forEach(input => input.addEventListener('input', calcTiktokUS));
+    addRow() {
+        const tr = document.createElement('tr');
 
-    const inputsUSProfit = document.querySelectorAll('#tiktok-us-profit input');
-    inputsUSProfit.forEach(input => input.addEventListener('input', calcTiktokUSProfit));
+        // Define fields based on type
+        // This is a bit dynamic but simple enough
+        let html = '';
+        if (this.settingsPrefix === 'us') { // US PRICE
+            html = `
+                <td><input type="number" class="cost-input" value="70" step="1"></td>
+                <td><input type="number" class="ads-input" value="5.00" step="0.01"></td>
+                <td><input type="number" class="aff-input" value="13.00" step="0.01"></td>
+                <td><input type="number" class="margin-input" value="25.00" step="1"></td>
+                <td class="res-shipping result-cell">-</td>
+                <td class="res-main result-cell">-</td>
+            `;
+        } else if (this.settingsPrefix === 'us-p') { // US PROFIT
+            html = `
+                <td><input type="number" class="cost-input" value="69" step="1"></td>
+                <td><input type="number" class="price-input" value="49.99" step="0.01"></td>
+                <td><input type="number" class="ads-input" value="5.00" step="0.01"></td>
+                <td><input type="number" class="aff-input" value="13.00" step="0.01"></td>
+                 <td class="res-shipping result-cell">-</td>
+                <td class="res-main result-cell">-</td>
+            `;
+        } else if (this.settingsPrefix === 'uk') { // UK PRICE
+            html = `
+                <td><input type="number" class="cost-input" value="70" step="1"></td>
+                <td><input type="number" class="ads-input" value="0.00" step="0.01"></td>
+                <td><input type="number" class="aff-input" value="0.00" step="0.01"></td>
+                <td><input type="number" class="margin-input" value="40.00" step="1"></td>
+                <td class="res-shipping result-cell">-</td>
+                <td class="res-main result-cell">-</td>
+            `;
+        }
 
-    const inputsUK = document.querySelectorAll('#tiktok-uk input');
-    inputsUK.forEach(input => input.addEventListener('input', calcTiktokUK));
+        html += `
+            <td>
+                <button class="action-btn delete-row"><i class="ph ph-trash"></i></button>
+            </td>
+        `;
 
-    // Initial Calc
-    calcTiktokUS();
-    calcTiktokUSProfit();
-    calcTiktokUK();
-});
+        tr.innerHTML = html;
+        this.tableBody.appendChild(tr);
+
+        // Bind events
+        tr.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => this.calculateRow(tr));
+        });
+
+        tr.querySelector('.delete-row').addEventListener('click', () => {
+            tr.remove();
+        });
+
+        // Run initial calc
+        this.calculateRow(tr);
+    }
+
+    calculateRow(row) {
+        const results = this.calcFn(row, this.settingsPrefix);
+        row.querySelector('.res-shipping').textContent = results.shipping;
+
+        const mainEl = row.querySelector('.res-main');
+        mainEl.textContent = results.mainResult;
+
+        if (results.isPercent) {
+            mainEl.className = 'res-main result-cell'; // reset
+            if (results.val < 0) mainEl.classList.add('profit-negative');
+            else mainEl.classList.add('profit-positive');
+        }
+    }
+
+    recalculateAll() {
+        const rows = this.tableBody.querySelectorAll('tr');
+        rows.forEach(row => this.calculateRow(row));
+    }
+}
+
+// Init App
+const app = new CalculatorApp();
