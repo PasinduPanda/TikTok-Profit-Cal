@@ -7,10 +7,16 @@ class CalculatorApp {
         this.usProfit = new Calculator('tiktok-us-profit', 'us-p', this.calcUSProfit.bind(this));
         this.ukPrice = new Calculator('tiktok-uk', 'uk', this.calcUKPrice.bind(this));
 
+        // Shein Calculators
+        this.sheinPrice = new Calculator('shein', 'shein', this.calcSheinPrice.bind(this));
+        this.sheinProfit = new Calculator('shein-profit', 'shein-p', this.calcSheinProfit.bind(this));
+
         // Initial Rows
         this.usPrice.addRow();
         this.usProfit.addRow();
         this.ukPrice.addRow();
+        this.sheinPrice.addRow();
+        this.sheinProfit.addRow();
 
         // Add one more example row for them
         this.usPrice.addRow();
@@ -123,6 +129,59 @@ class CalculatorApp {
             mainResult: `£${sellingPrice.toFixed(2)}`
         };
     }
+
+    calcSheinPrice(row, settings) {
+        // Inputs
+        const rmbCost = parseFloat(row.querySelector('.cost-input').value) || 0;
+        const profitMargin = (parseFloat(row.querySelector('.margin-input').value) || 0) / 100;
+
+        // Global
+        const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
+        const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
+        const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
+
+        // Logic
+        const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
+        // Total % to deduct from 1 = Refund + Profit (no ads/aff/service fee in sheet)
+        const sumPercentages = refundPercent + profitMargin;
+
+        let sellingPrice = 0;
+        if (sumPercentages < 1) {
+            sellingPrice = productShippingUSD / (1 - sumPercentages);
+        }
+
+        return {
+            shipping: `$${productShippingUSD.toFixed(2)}`,
+            mainResult: `$${sellingPrice.toFixed(2)}`
+        };
+    }
+
+    calcSheinProfit(row, settings) {
+        // Inputs
+        const rmbCost = parseFloat(row.querySelector('.cost-input').value) || 0;
+        const sellingPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+
+        // Global
+        const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
+        const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
+        const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
+
+        // Logic
+        const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
+        let shippingCostPercent = sellingPrice > 0 ? productShippingUSD / sellingPrice : 0;
+
+        // Margin = 1 - Cost% - Refund%
+        const profitMargin = 1 - shippingCostPercent - refundPercent;
+
+        return {
+            shipping: `$${productShippingUSD.toFixed(2)}`,
+            mainResult: `${(profitMargin * 100).toFixed(2)}%`,
+            isPercent: true,
+            val: profitMargin
+        };
+    }
 }
 
 class Calculator {
@@ -162,6 +221,20 @@ class Calculator {
                 <td><input type="number" class="ads-input" value="0.00" step="0.01"></td>
                 <td><input type="number" class="aff-input" value="0.00" step="0.01"></td>
                 <td><input type="number" class="margin-input" value="40.00" step="1"></td>
+                <td class="res-shipping result-cell">-</td>
+                <td class="res-main result-cell">-</td>
+            `;
+        } else if (this.settingsPrefix === 'shein') { // SHEIN PRICE
+            html = `
+                <td><input type="number" class="cost-input" value="70" step="1"></td>
+                <td><input type="number" class="margin-input" value="20.00" step="1"></td>
+                <td class="res-shipping result-cell">-</td>
+                <td class="res-main result-cell">-</td>
+            `;
+        } else if (this.settingsPrefix === 'shein-p') { // SHEIN PROFIT
+            html = `
+                <td><input type="number" class="cost-input" value="69" step="1"></td>
+                <td><input type="number" class="price-input" value="49.99" step="0.01"></td>
                 <td class="res-shipping result-cell">-</td>
                 <td class="res-main result-cell">-</td>
             `;
