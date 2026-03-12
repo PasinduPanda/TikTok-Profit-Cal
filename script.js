@@ -41,6 +41,8 @@ class CalculatorApp {
                 this.usPrice.recalculateAll();
                 this.usProfit.recalculateAll();
                 this.ukPrice.recalculateAll();
+                this.sheinPrice.recalculateAll();
+                this.sheinProfit.recalculateAll();
             });
         });
     }
@@ -59,11 +61,12 @@ class CalculatorApp {
         const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
         const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
         const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const warehousePercent = (parseFloat(document.getElementById(`${settings}-warehouse-cost`).value) || 0) / 100;
         const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
 
         // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
-        const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + refundPercent + profitMargin;
+        const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + warehousePercent + refundPercent + profitMargin;
 
         let sellingPrice = 0;
         if (sumPercentages < 1) {
@@ -88,12 +91,13 @@ class CalculatorApp {
         const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
         const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
         const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const warehousePercent = (parseFloat(document.getElementById(`${settings}-warehouse-cost`).value) || 0) / 100;
         const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
 
         // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
         let shippingCostPercent = sellingPrice > 0 ? productShippingUSD / sellingPrice : 0;
-        const profitMargin = 1 - shippingCostPercent - adsCostPercent - affCostPercent - tiktokFeePercent - refundPercent;
+        const profitMargin = 1 - shippingCostPercent - adsCostPercent - affCostPercent - tiktokFeePercent - warehousePercent - refundPercent;
 
         return {
             shipping: `$${productShippingUSD.toFixed(2)}`,
@@ -114,11 +118,12 @@ class CalculatorApp {
         const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 9.0;
         const shippingCost = parseFloat(document.getElementById(`${settings}-shipping-cost`).value) || 0;
         const tiktokFeePercent = (parseFloat(document.getElementById(`${settings}-tiktok-fee`).value) || 0) / 100;
+        const warehousePercent = (parseFloat(document.getElementById(`${settings}-warehouse-cost`).value) || 0) / 100;
         const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
 
         // Logic
         const productShippingGBP = (rmbCost / exchangeRate) + shippingCost;
-        const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + refundPercent + profitMargin;
+        const sumPercentages = adsCostPercent + affCostPercent + tiktokFeePercent + warehousePercent + refundPercent + profitMargin;
         let sellingPrice = 0;
         if (sumPercentages < 1) {
             sellingPrice = productShippingGBP / (1 - sumPercentages);
@@ -139,12 +144,13 @@ class CalculatorApp {
         const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
         const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
         const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const warehousePercent = (parseFloat(document.getElementById(`${settings}-warehouse-cost`).value) || 0) / 100;
         const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
 
         // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
-        // Total % to deduct from 1 = Refund + Profit (no ads/aff/service fee in sheet)
-        const sumPercentages = refundPercent + profitMargin;
+        // Total % to deduct from 1 = Warehouse + Refund + Profit
+        const sumPercentages = warehousePercent + refundPercent + profitMargin;
 
         let sellingPrice = 0;
         if (sumPercentages < 1) {
@@ -166,14 +172,15 @@ class CalculatorApp {
         const exchangeRate = parseFloat(document.getElementById(`${settings}-exchange-rate`).value) || 7.0;
         const firstFlight = parseFloat(document.getElementById(`${settings}-first-flight`).value) || 0;
         const lastFlight = parseFloat(document.getElementById(`${settings}-last-flight`).value) || 0;
+        const warehousePercent = (parseFloat(document.getElementById(`${settings}-warehouse-cost`).value) || 0) / 100;
         const refundPercent = (parseFloat(document.getElementById(`${settings}-refund-rate`).value) || 0) / 100;
 
         // Logic
         const productShippingUSD = (rmbCost / exchangeRate) + firstFlight + lastFlight;
         let shippingCostPercent = sellingPrice > 0 ? productShippingUSD / sellingPrice : 0;
 
-        // Margin = 1 - Cost% - Refund%
-        const profitMargin = 1 - shippingCostPercent - refundPercent;
+        // Margin = 1 - Cost% - Warehouse% - Refund%
+        const profitMargin = 1 - shippingCostPercent - warehousePercent - refundPercent;
 
         return {
             shipping: `$${productShippingUSD.toFixed(2)}`,
